@@ -40,40 +40,45 @@ class TemplateManager
     $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
     $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
 
-     if(strpos($text, '[quote:destination_name]') !== false){
-       $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
-       //var_dump($destinationOfQuote->countryName);=> for test
-     }
+    if(strpos($text, '[quote:destination_name]') !== false){
+      $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+      //var_dump($destinationOfQuote->countryName);=> for test
+    }
 
     return $text;
   }
 
+  //creat a function for userEntity
+  public function placeUser($text,$_user){
+    if($_user) {
+      if(strpos($text, '[user:first_name]') !== false){
+        $text = str_replace('[user:first_name]', ucfirst(mb_strtolower($_user->firstname)), $text);
+        //mb_strtolower: return all letters in mini
+        //ucfist: return the fist lettre in majr
+      }
+    }
+    return $text;
+  }
 
   //refactor
   private function computeText($text, array $data)
   {
+    //initialize
     $APPLICATION_CONTEXT = ApplicationContext::getInstance();
 
     $quote = (isset($data['quote']) and $data['quote'] instanceof Quote) ? $data['quote'] : null;
+    $_user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
 
     if ($quote)
     {
       $_quoteFromRepository = QuoteRepository::getInstance()->getById($quote->id);
-
-
-      //call the function
+        
+      //call public functions
       $text = $this->placeQuote($text);
       $text = $this->placeDestination($text, $quote);
+      $text = $this->placeUser($text,$_user);
 
-      /*
-      * USER
-      * [user:*]
-      */
-      $_user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
-      if($_user) {
-        (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(mb_strtolower($_user->firstname)), $text);
-      }
-
+      //return all changes
       return $text;
     }
   }
