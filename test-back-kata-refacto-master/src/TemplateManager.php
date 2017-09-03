@@ -40,22 +40,10 @@ class TemplateManager
     $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
     $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
 
-    //strpos — Cherche la position de la première occurrence dans une chaîne
-    if(strpos($text, '[quote:destination_link]') !== false){
-      $destination = DestinationRepository::getInstance()->getById($quote->destinationId);
-    }
-    if(strpos($text, '[quote:destination_name]') !== false){
-      $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
-      //var_dump($destinationOfQuote->countryName);=> for test
-    }
-
-    if(isset($destination)){
-      $text = str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destination->countryName . '/quote/' . $_quoteFromRepository->id, $text);
-
-    }
-    else{
-      $text = str_replace('[quote:destination_link]', '', $text);
-    }
+     if(strpos($text, '[quote:destination_name]') !== false){
+       $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+       //var_dump($destinationOfQuote->countryName);=> for test
+     }
 
     return $text;
   }
