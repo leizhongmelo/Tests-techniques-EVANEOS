@@ -40,7 +40,9 @@ class TemplateManager
     $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
     $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
 
-    if(strpos($text, '[quote:destination_name]') !== false){
+    $containsDestinationName = strpos($text, '[quote:destination_name]');
+
+    if($containsDestinationName !== false){
       $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
       //var_dump($destinationOfQuote->countryName);=> for test
     }
@@ -50,8 +52,11 @@ class TemplateManager
 
   //creat a function for userEntity
   public function placeUser($text,$_user){
+
+    $containsFirstName = strpos($text, '[user:first_name]');
+
     if($_user) {
-      if(strpos($text, '[user:first_name]') !== false){
+      if($containsFirstName !== false){
         $text = str_replace('[user:first_name]', ucfirst(mb_strtolower($_user->firstname)), $text);
         //mb_strtolower: return all letters in mini
         //ucfist: return the fist lettre in majr
@@ -72,7 +77,7 @@ class TemplateManager
     if ($quote)
     {
       $_quoteFromRepository = QuoteRepository::getInstance()->getById($quote->id);
-        
+
       //call public functions
       $text = $this->placeQuote($text);
       $text = $this->placeDestination($text, $quote);
