@@ -2,12 +2,19 @@
 
 //creat a javascript module
 (function(){
+  var string = "Nice to meet you Evanoes team"
+  //creat a showOccurence function
+  function showOccurence(){
 
-//creat a showOccurence function
-function showOccurence(){
+    //replace all sympoles by ""; separate each letter (1 or + space); apply the function on all elements of the table
+    var count = string.replace("/[^\w\s]/g","").split(/\s+/).reduce(function(map, word){
+        map[word] = (map[word]||0)+1;
+        return map;
+    });
+    return count;
 
-}
-
+  }
+  console.log(showOccurence());
 
 
 }());
