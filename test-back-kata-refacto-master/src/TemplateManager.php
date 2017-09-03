@@ -34,6 +34,33 @@ class TemplateManager
     return $text;
   }
 
+  //creat a function for DestionationEntity
+  public function placeDestination($text,$quote)
+  {
+    $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
+    $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
+
+    //strpos — Cherche la position de la première occurrence dans une chaîne
+    if(strpos($text, '[quote:destination_link]') !== false){
+      $destination = DestinationRepository::getInstance()->getById($quote->destinationId);
+    }
+    if(strpos($text, '[quote:destination_name]') !== false){
+      $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+      //var_dump($destinationOfQuote->countryName);=> for test
+    }
+
+    if(isset($destination)){
+      $text = str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destination->countryName . '/quote/' . $_quoteFromRepository->id, $text);
+
+    }
+    else{
+      $text = str_replace('[quote:destination_link]', '', $text);
+    }
+
+    return $text;
+  }
+
+
   //refactor
   private function computeText($text, array $data)
   {
@@ -44,33 +71,22 @@ class TemplateManager
     if ($quote)
     {
       $_quoteFromRepository = QuoteRepository::getInstance()->getById($quote->id);
-      $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
-      $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
 
-      if(strpos($text, '[quote:destination_link]') !== false){
-        $destination = DestinationRepository::getInstance()->getById($quote->destinationId);
-      }
 
       //call the function
       $text = $this->placeQuote($text);
+      $text = $this->placeDestination($text, $quote);
 
-      (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+      /*
+      * USER
+      * [user:*]
+      */
+      $_user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
+      if($_user) {
+        (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(mb_strtolower($_user->firstname)), $text);
+      }
+
+      return $text;
     }
-
-    if (isset($destination))
-    $text = str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destination->countryName . '/quote/' . $_quoteFromRepository->id, $text);
-    else
-    $text = str_replace('[quote:destination_link]', '', $text);
-
-    /*
-    * USER
-    * [user:*]
-    */
-    $_user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
-    if($_user) {
-      (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(mb_strtolower($_user->firstname)), $text);
-    }
-
-    return $text;
   }
 }
